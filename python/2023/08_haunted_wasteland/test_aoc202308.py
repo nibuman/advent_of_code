@@ -17,12 +17,12 @@ def example2():
     return aoc202308.parse_data(puzzle_input)
 
 
-#@pytest.mark.skip(reason="Not implemented")
+# @pytest.mark.skip(reason="Not implemented")
 def test_parse_example1(example1):
     """Test that input is parsed properly."""
     directions, dir_map = example1
     assert directions == "RL"
-    assert dir_map['AAA'] == ("BBB","CCC")
+    assert dir_map["AAA"] == ("BBB", "CCC")
 
 
 # @pytest.mark.skip(reason="Not implemented")
