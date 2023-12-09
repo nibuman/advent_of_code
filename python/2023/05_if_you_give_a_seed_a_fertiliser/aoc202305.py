@@ -6,18 +6,14 @@ import sys
 from typing import NamedTuple
 
 
-class Seed(NamedTuple):
-    start: int
-    range: int
-
-
 class Ranges(NamedTuple):
     destination_start: int
-    source_start: int
+    start: int
     range_length: int
+    end: int = 0
 
 
-def part1(data):
+def part1(data: tuple[list[int], dict[str, list[Ranges]]]):
     locations = []
     seeds, source = data
     for seed in seeds:
@@ -25,34 +21,103 @@ def part1(data):
     return min(locations)
 
 
-def part2(data):
+def part2(data: tuple[list[int], dict[str, list[Ranges]]]):
     locations = []
     seeds, source = data
     new_seeds = []
     for start, range_ in zip(seeds[::2], seeds[1::2]):
-        new_seeds.append(Seed(start=start, range=range_))
+        new_seeds.append(
+            Ranges(
+                destination_start=0,
+                start=start,
+                range_length=range_,
+                end=start + range_ - 1,
+            )
+        )
     locations = get_location2(new_seeds, source)
-    return "not working"
+    return min(loc.start for loc in locations)
 
 
-def get_location2(seeds: list[Seed], source: dict[str, list[Ranges]]):
+def get_location2(seeds: list[Ranges], source: dict[str, list[Ranges]]):
     source_stack = seeds
     destination_stack = []
     for s in source:
         while source_stack:
-            current_range = source_stack.pop()
+            current_seeds = source_stack.pop()
             for range_ in source[s]:
-                offset = current_range.start - range_.source_start
+                range_end = range_.start + range_.range_length - 1
+                if (current_seeds.start < range_.start) and (
+                    current_seeds.end > range_.start
+                ):
+                    source_stack.append(
+                        Ranges(
+                            destination_start=0,
+                            start=current_seeds.start,
+                            range_length=0,
+                            end=range_.start - 1,
+                        )
+                    )
+                    current_seeds = Ranges(
+                        destination_start=0,
+                        start=range_.start,
+                        range_length=0,
+                        end=current_seeds.end,
+                    )
+                if (current_seeds.end > range_end) and (
+                    current_seeds.start < range_end
+                ):
+                    source_stack.append(
+                        Ranges(
+                            destination_start=0,
+                            start=range_end + 1,
+                            range_length=0,
+                            end=current_seeds.end,
+                        )
+                    )
+                    current_seeds = Ranges(
+                        destination_start=0,
+                        start=current_seeds.start,
+                        range_length=0,
+                        end=range_end,
+                    )
+                if (current_seeds.start >= range_.start) and (
+                    current_seeds.end <= range_end
+                ):
+                    offset = current_seeds.start - range_.start
+                    destination_stack.append(
+                        Ranges(
+                            destination_start=0,
+                            start=range_.destination_start + offset,
+                            range_length=0,
+                            end=range_.destination_start
+                            + offset
+                            + (current_seeds.end - current_seeds.start),
+                        )
+                    )
+                    break
+            else:
+                destination_stack.append(
+                    Ranges(
+                        destination_start=0,
+                        start=current_seeds.start,
+                        range_length=0,
+                        end=current_seeds.end,
+                    )
+                )
+
+        source_stack = destination_stack
+        destination_stack = []
+    return source_stack
 
 
 def get_location(seed, source: dict[str, list[Ranges]]):
     current_num = seed
     for s in source:
         for range_ in source[s]:
-            offset = current_num - range_.source_start
+            offset = current_num - range_.start
             if offset < 0:
                 continue
-            elif current_num >= range_.source_start + range_.range_length:
+            elif current_num >= range_.start + range_.range_length:
                 continue
             else:
                 current_num = range_.destination_start + offset
@@ -60,7 +125,7 @@ def get_location(seed, source: dict[str, list[Ranges]]):
     return current_num
 
 
-def parse(data):
+def parse(data) -> tuple[list[int], dict[str, list[Ranges]]]:
     seeds = []
     source = {}
     for line in data:
