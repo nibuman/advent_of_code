@@ -75,15 +75,18 @@ def get_trick_rank(hand):
         trick_rank = "2"
     return trick_rank
 
+
 def solve(puzzle_input):
     """Solve the puzzle for the given input."""
     data = parse(puzzle_input)
     yield "Part 1", part1(data)
     yield "Part 2", part2(data)
 
+
 def read_file(file_name):
     PUZZLE_DIR = pathlib.Path(__file__).parent
     return pathlib.Path(PUZZLE_DIR / file_name).read_text().rstrip().split("\n")
+
 
 if __name__ == "__main__":
     DEFAULT_INPUT_FILES = ["example1.txt", "input.txt"]
