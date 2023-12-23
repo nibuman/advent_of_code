@@ -3,6 +3,22 @@
 # Standard library imports
 import pathlib
 import sys
+from dataclasses import dataclass
+from collections import deque
+
+
+@dataclass(frozen=True)
+class Instruction:
+    label: str
+    hash_: int
+    operator: str
+    focal_length: int | None = None
+
+
+@dataclass(frozen=True)
+class Lens:
+    label: str
+    focal_length: int
 
 
 def parse(puzzle_input):
@@ -12,9 +28,6 @@ def parse(puzzle_input):
 
 def part1(data):
     """Solve part 1."""
-    # hashes = []
-    # for string in data:
-    #     hashes.append(get_hash(string))
     return sum(get_hash(string) for string in data)
 
 
@@ -29,6 +42,61 @@ def get_hash(string):
 
 def part2(data):
     """Solve part 2."""
+    instructions = get_instuctions(data)
+    boxes: list[list[Lens]] = [[] for _ in range(256)]
+    op = {"-": op_minus, "=": op_equals}
+    for instruction in instructions:
+        op[instruction.operator](
+            box=boxes[instruction.hash_],
+            label=instruction.label,
+            focal_length=instruction.focal_length,
+        )
+    return focal_power(boxes)
+
+
+def focal_power(boxes: list[list[Lens]]):
+    scores = []
+    for b, box in enumerate(boxes):
+        for l, lens in enumerate(box):
+            scores.append((b + 1) * (l + 1) * lens.focal_length)
+    return sum(scores)
+
+
+def op_minus(box: list[Lens], label, focal_length=None):
+    for idx, lens in enumerate(box):
+        if lens.label == label:
+            box.pop(idx)
+            return idx
+
+
+def op_equals(box: list[Lens], label, focal_length):
+    this_lens = Lens(label=label, focal_length=focal_length)
+    pos = op_minus(box, label)
+    if pos is None:
+        box.append(this_lens)
+    else:
+        box.insert(pos, this_lens)
+
+
+def get_instuctions(data) -> list[Instruction]:
+    instructions = []
+    for string in data:
+        if "-" in string:
+            label = string.removesuffix("-")
+            instructions.append(
+                Instruction(label=label, hash_=get_hash(label), operator="-")
+            )
+        else:
+            label, lens = string.split("=")
+            instructions.append(
+                Instruction(
+                    label=label,
+                    hash_=get_hash(label),
+                    operator="=",
+                    focal_length=int(lens),
+                )
+            )
+    return instructions
 
 
 def solve(puzzle_input):
