@@ -3,8 +3,8 @@
 # Standard library imports
 import pathlib
 import sys
-from utils.points import Point as P
-from utils.points import manhattan
+from utils.vectors import Vector as V
+from utils.vectors import manhattan
 
 
 def parse(puzzle_input):
@@ -51,9 +51,9 @@ def inflate_space(empty_rows, empty_cols, galaxies, inflation_factor):
         )
 
 
-def find_galaxies(data) -> list[P]:
+def find_galaxies(data) -> list[V]:
     return [
-        P(r, c)
+        V(r, c)
         for r, row in enumerate(data)
         for c, char in enumerate(row)
         if char == "#"
