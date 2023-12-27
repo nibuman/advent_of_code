@@ -4,7 +4,6 @@
 import pathlib
 import sys
 from collections import deque
-from functools import lru_cache
 
 
 def part1(cards):
