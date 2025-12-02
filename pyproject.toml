@@ -1,0 +1,14 @@
+[project]
+name = "advent-of-code"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "advent-of-code-data>=2.1.0",
+    "copier>=9.11.0",
+    "pytest>=9.0.1",
+]
