@@ -3,44 +3,40 @@
 # Standard library imports
 import pathlib
 import sys
-import operator
 from typing import Generator
 START_POS = 50
-FUNC_MAP = {"L": operator.sub, "R": operator.add}
 
 def parse(puzzle_input):
     """Parse input."""
     return puzzle_input
 
-def rotations(data) -> Generator[tuple[str, int]]:    
+def rotations(data) -> Generator[tuple[int, int, int]]:
+    pos = START_POS   
     for d in data:
         direction = d[0]
         distance = int(d[1:])
-        yield direction, distance
+        if direction == "L":
+            distance = -distance
+        shift = pos + distance
+        pos = shift % 100
+        yield pos, shift, distance
 
 def part1(data):
-    positions = [START_POS,]    
-    for direction, distance in rotations(data):
-        pos = FUNC_MAP[direction](positions[-1], distance) % 100
-        positions.append(pos)
-    return sum(p==0 for p in positions)
+    return sum(pos==0 for pos, _, _ in rotations(data))
 
 
 def part2(data):
     """Solve part 2."""
     counts = 0
-    pos = START_POS
-    for direction, distance in rotations(data):
+    old_pos = START_POS
+    for pos, shift, distance in rotations(data):
         if distance == 0:
             continue
-        shift = FUNC_MAP[direction](pos, distance) 
-        if (pos != 0) and (shift >= 100):
-            counts += shift // 100
-        elif (pos !=0) and (shift <= 0):
+        if (old_pos !=0) and (shift <= 0):
             counts += abs((shift-1)//100)
-        elif pos == 0:
-            counts += distance // 100
-        pos = shift % 100
+        else:
+            counts += abs(shift) // 100
+        old_pos = pos
     return counts             
 
 
