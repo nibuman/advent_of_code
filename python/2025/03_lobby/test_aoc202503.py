@@ -16,6 +16,7 @@ def example2():
     puzzle_input = aoc202503.read_file("example2.txt")
     return aoc202503.parse(puzzle_input)
 
+
 @pytest.fixture
 def real_data():
     puzzle_input = aoc202503.read_file("input.txt")
@@ -28,10 +29,9 @@ def test_parse_example1(example1):
     assert example1 == ...
 
 
-@pytest.mark.skip(reason="Not implemented")
 def test_part1_example1(example1):
     """Test part 1 on example input."""
-    assert aoc202503.part1(example1) == ...
+    assert aoc202503.part1(example1) == 357
 
 
 @pytest.mark.skip(reason="Not implemented")
@@ -45,10 +45,10 @@ def test_part2_example2(example2):
     """Test part 2 on example input."""
     assert aoc202503.part2(example2) == ...
 
-@pytest.mark.skip(reason="Not implemented")
+
 def test_part1_real(real_data):
     """Test part 1 on real input."""
-    assert aoc202503.part1(real_data) == ...
+    assert aoc202503.part1(real_data) == 16858
 
 
 @pytest.mark.skip(reason="Not implemented")
