@@ -37,12 +37,16 @@ def part2(data):
     for start, end in ID_ranges(data):
         for prod_id in range(start, end + 1):
             prod_string = str(prod_id)
-            if len(prod_string) % 2 == 1:
-                continue
             mid = len(prod_string) // 2
-            if prod_string[:mid] == prod_string[mid:]:
-                invalid_IDs.append(prod_id)
+            for d in range(1, mid + 1):
+                if len(prod_string) % d:
+                    continue
+                n_strings = len(prod_string) // d
+                if prod_string[:d] * n_strings == prod_string:
+                    invalid_IDs.append(prod_id)
+                    break
     return sum(invalid_IDs)
+
 
 def solve(puzzle_input):
     """Solve the puzzle for the given input."""
