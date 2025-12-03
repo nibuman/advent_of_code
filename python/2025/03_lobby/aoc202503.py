@@ -23,6 +23,17 @@ def part1(data: list[str]):
 
 def part2(data):
     """Solve part 2."""
+    joltage: list[int] = []
+    for num_str in data:
+        num: list[str] = []
+        low_limit = 0
+        start = len(num_str) - 11
+        end = len(num_str) + 1
+        for high_limit in range(start, end):
+            num.append(max(num_str[low_limit:high_limit]))
+            low_limit = num_str.find(num[-1], low_limit) + 1
+        joltage.append(int("".join(num)))
+    return sum(joltage)
 
 
 def solve(puzzle_input):
