@@ -55,7 +55,7 @@ def rationalise_ranges(ranges: list[Range]) -> list[Range]:
             first_range = second_range
         elif second_range.end > first_range.end:
             first_range.end = second_range.end
-    new_ranges.append(Range(start=first_range.start, end=first_range.end))
+    new_ranges.append(first_range)
     return new_ranges
 
 
