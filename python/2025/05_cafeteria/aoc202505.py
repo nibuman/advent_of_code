@@ -48,20 +48,15 @@ def part1(data: tuple[list[Range], list[int]]) -> int:
 def rationalise_ranges(ranges: list[Range]) -> list[Range]:
     range_deque = deque(sorted(ranges, key=lambda x: x.start))
     new_ranges: list[Range] = []
-    current_range = range_deque.popleft()
-    start = current_range.start
-    end = current_range.end
+    first_range = range_deque.popleft()
     while range_deque:
-        current_range = range_deque.popleft()
-        if current_range.start > end:
-            new_ranges.append(Range(start=start, end=end))
-            start = current_range.start
-            end = current_range.end
-            continue
-        elif current_range.end > end:
-            end = current_range.end
-    else:
-        new_ranges.append(Range(start=start, end=end))
+        second_range = range_deque.popleft()
+        if second_range.start > first_range.end:
+            new_ranges.append(first_range)
+            first_range = second_range
+        elif second_range.end > first_range.end:
+            first_range.end = second_range.end
+    new_ranges.append(Range(start=first_range.start, end=first_range.end))
     return new_ranges
 
 
