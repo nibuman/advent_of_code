@@ -15,11 +15,14 @@ class Range:
     @property
     def id_count(self):
         return self.end - self.start + 1
-    
+
     @classmethod
     def from_string(cls, puzzle_input: str):
         start, end = puzzle_input.split("-")
         return cls(start=int(start), end=int(end))
+
+    def __contains__(self, item: int) -> bool:
+        return item in range(self.start, self.end + 1)
 
 
 def parse(puzzle_input: str) -> tuple[list[Range], list[int]]:
@@ -36,7 +39,7 @@ def part1(data: tuple[list[Range], list[int]]) -> int:
     count = 0
     for ingredient_ID in ingredient_IDs:
         for ID_range in ranges:
-            if ID_range.start <= ingredient_ID <= ID_range.end:
+            if ingredient_ID in ID_range:
                 count += 1
                 break
     return count
