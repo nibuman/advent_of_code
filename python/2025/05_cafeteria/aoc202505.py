@@ -37,11 +37,11 @@ def parse(puzzle_input: str) -> tuple[list[Range], list[int]]:
 
 def part1(data: tuple[list[Range], list[int]]) -> int:
     """Solve part 1."""
-    ranges, ingredient_IDs = data
+    ranges, ingredient_ids = data
     count = 0
-    for ingredient_ID in ingredient_IDs:
-        for ID_range in ranges:
-            if ingredient_ID in ID_range:
+    for id_ in ingredient_ids:
+        for range_ in ranges:
+            if id_ in range_:
                 count += 1
                 break
     return count
