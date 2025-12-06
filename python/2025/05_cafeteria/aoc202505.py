@@ -66,7 +66,7 @@ def part2(data):
     """Solve part 2."""
     ranges, _ = data
     new_ranges = rationalise_ranges(ranges)
-    return sum(len(r) for r in new_ranges)
+    return sum(len(range_) for range_ in new_ranges)
 
 
 def solve(puzzle_input):
