@@ -12,6 +12,10 @@ class Range:
     start: int
     end: int
 
+    @property
+    def id_count(self):
+        return self.end - self.start + 1
+    
     @classmethod
     def from_string(cls, puzzle_input: str):
         start, end = puzzle_input.split("-")
@@ -62,7 +66,7 @@ def part2(data):
     """Solve part 2."""
     ranges, _ = data
     new_ranges = rationalise_ranges(ranges)
-    return sum(r.end - r.start + 1 for r in new_ranges)
+    return sum(r.id_count for r in new_ranges)
 
 
 def solve(puzzle_input):
