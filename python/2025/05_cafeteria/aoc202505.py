@@ -4,7 +4,6 @@
 from dataclasses import dataclass
 import pathlib
 import sys
-from collections import deque
 
 
 @dataclass
@@ -46,11 +45,11 @@ def part1(data: tuple[list[Range], list[int]]) -> int:
 
 
 def rationalise_ranges(ranges: list[Range]) -> list[Range]:
-    range_deque = deque(sorted(ranges, key=lambda x: x.start))
+    ranges = sorted(ranges, key=lambda x: x.start, reverse=True)
     new_ranges: list[Range] = []
-    first_range = range_deque.popleft()
-    while range_deque:
-        second_range = range_deque.popleft()
+    first_range = ranges.pop()
+    while ranges:
+        second_range = ranges.pop()
         if second_range.start > first_range.end:
             new_ranges.append(first_range)
             first_range = second_range
