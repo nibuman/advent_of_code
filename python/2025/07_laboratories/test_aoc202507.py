@@ -19,14 +19,13 @@ def real_data():
 
 def test_parse_example1_start_position(example1):
     """Test that input is parsed properly."""
-    start, *_ = example1
+    start = example1
     assert start == (0, 7)
 
 
 def test_parse_example1_splitters(example1):
     """Test that input is parsed properly."""
-    _, splitters, *_ = example1
-    assert len(splitters) == 22
+    assert len(aoc202507.SPLITTERS) == 22
 
 
 def test_part1_example1(example1):
@@ -34,19 +33,16 @@ def test_part1_example1(example1):
     assert aoc202507.part1(example1) == 21
 
 
-@pytest.mark.skip(reason="Not implemented")
 def test_part2_example1(example1):
     """Test part 2 on example input."""
-    assert aoc202507.part2(example1) == ...
+    assert aoc202507.part2(example1) == 40
 
 
-@pytest.mark.skip(reason="Not implemented")
 def test_part1_real(real_data):
     """Test part 1 on real input."""
-    assert aoc202507.part1(real_data) == ...
+    assert aoc202507.part1(real_data) == 1690
 
 
-@pytest.mark.skip(reason="Not implemented")
 def test_part2_real(real_data):
     """Test part 2 on real input."""
-    assert aoc202507.part2(real_data) == ...
+    assert aoc202507.part2(real_data) == 221371496188107

@@ -1,40 +1,46 @@
 """AoC 7, 2025: Laboratories."""
 
 # Standard library imports
+import functools
 import pathlib
 import sys
 from collections import deque
 from itertools import product
+from typing import Final
 
-type position = tuple[int, int]
+position = tuple[int, int]
+SPLITTERS: Final[frozenset[position]]
+R_MAX: Final[int]
+C_MAX: Final[int]
 
 
-def parse(puzzle_input: str) -> tuple[position, set[position], int, int]:
+def parse(puzzle_input: str) -> position:
     """Parse input."""
+    global SPLITTERS, R_MAX, C_MAX
     data = puzzle_input.split("\n")
-    r_max = len(data)
-    c_max = len(data[0])
-    positions = product(range(r_max), range(c_max))
-    splitters = {(r, c) for r, c in positions if data[r][c] == "^"}
+    R_MAX = len(data)
+    C_MAX = len(data[0])
+    positions = product(range(R_MAX), range(C_MAX))
+    SPLITTERS = frozenset((r, c) for r, c in positions if data[r][c] == "^")
     start = (0, data[0].find("S"))
-    return start, splitters, r_max, c_max
+    return start
 
 
 def part1(data):
     """Solve part 1."""
-    start, splitters, max_len, max_col = data
+    start = data
     splits = 0
     beams = deque([start])
     row = 0
-    split_positions = [(1, -1), (1, 1)]
-    while row < max_len + 1:
+    split_positions = [(1, 1), (1, -1)]
+    while row < R_MAX + 1:
         row, col = beams.popleft()
-        if (row + 1, col) in splitters:
+        if (row + 1, col) in SPLITTERS:
             splits += 1
             for row_shift, col_shift in split_positions:
                 new_row = row + row_shift
                 new_col = col + col_shift
-                if 0 > new_col > max_col:
+                if 0 > new_col > C_MAX:
                     continue
                 if (new_row, new_col) not in beams:
                     beams.append((new_row, new_col))
@@ -43,8 +49,28 @@ def part1(data):
     return splits
 
 
+@functools.cache
+def follow_beam(pos: position) -> int:
+    """Given a beam position, works out what the next positions and returns the number
+    of beams that reach the end
+    """
+    beam_count = 0
+    r, c = pos
+    if r >= R_MAX:
+        return 1
+    if 0 > c >= C_MAX:
+        return 0
+    if (r, c) in SPLITTERS:
+        beam_count += follow_beam(pos=(r + 1, c + 1))
+        beam_count += follow_beam(pos=(r + 1, c - 1))
+    else:
+        beam_count += follow_beam(pos=(r + 1, c))
+    return beam_count
+
+
 def part2(data):
     """Solve part 2."""
+    return follow_beam(pos=data)
 
 
 def solve(puzzle_input):
