@@ -12,6 +12,7 @@ position = tuple[int, int]
 SPLITTERS: Final[frozenset[position]]
 R_MAX: Final[int]
 C_MAX: Final[int]
+seen_splitters = set()
 
 
 def parse(puzzle_input: str) -> position:
@@ -28,24 +29,28 @@ def parse(puzzle_input: str) -> position:
 
 def part1(data):
     """Solve part 1."""
-    start = data
+    return count_splits(pos=data)
+
+
+def count_splits(pos: position) -> int:
+    """Given a beam position, works out what the next positions and returns the number
+    of splits
+    """
     splits = 0
-    beams = deque([start])
-    row = 0
-    split_positions = [(1, 1), (1, -1)]
-    while row < R_MAX + 1:
-        row, col = beams.popleft()
-        if (row + 1, col) in SPLITTERS:
-            splits += 1
-            for row_shift, col_shift in split_positions:
-                new_row = row + row_shift
-                new_col = col + col_shift
-                if 0 > new_col > C_MAX:
-                    continue
-                if (new_row, new_col) not in beams:
-                    beams.append((new_row, new_col))
-        elif (row + 1, col) not in beams:
-            beams.append((row + 1, col))
+    r, c = pos
+    if r >= R_MAX:
+        return 0
+    if 0 > c >= C_MAX:
+        return 0
+    if (r, c) in seen_splitters:
+        return 0
+    if (r, c) in SPLITTERS:
+        seen_splitters.add((r, c))
+        splits = 1
+        splits += count_splits(pos=(r + 1, c + 1))
+        splits += count_splits(pos=(r + 1, c - 1))
+    else:
+        splits += count_splits(pos=(r + 1, c))
     return splits
 
 
