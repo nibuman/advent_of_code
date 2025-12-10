@@ -4,9 +4,9 @@
 import functools
 import pathlib
 import sys
-from collections import deque
 from itertools import product
 from typing import Final
+from datetime import datetime
 
 position = tuple[int, int]
 SPLITTERS: Final[frozenset[position]]
@@ -81,8 +81,11 @@ def part2(data):
 def solve(puzzle_input):
     """Solve the puzzle for the given input."""
     data = parse(puzzle_input)
-    yield "Part 1", part1(data)
-    yield "Part 2", part2(data)
+    for name, func in (("Part1", part1), ("Part2", part2)):
+        t1 = datetime.now()
+        result = func(data)
+        t2 = datetime.now()
+        yield name, result, (t2 - t1).microseconds
 
 
 def read_file(file_name) -> str:
@@ -96,4 +99,9 @@ if __name__ == "__main__":
     for file_name in puzzle_input_files:
         print(f"\n{file_name}:")
         solutions = solve(puzzle_input=read_file(file_name))
-        print("\n".join(f"{puzzle}: {solution}" for puzzle, solution in solutions))
+        print(
+            "\n".join(
+                f"{puzzle}: {solution} (in {time / 1000} ms)"
+                for puzzle, solution, time in solutions
+            )
+        )
