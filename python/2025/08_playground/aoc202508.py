@@ -49,18 +49,30 @@ def part1(data: list[JunctionBox], data_set: str):
         jbs.update((first_jb, second_jb))
 
     def get_path_len(jb: JunctionBox) -> int:
+        if jb not in jbs:
+            return 0
+        jbs.discard(jb)
         path_len = 1
-        for jb in jb.attachments:
-            if jb in jbs:
-                jbs.remove(jb)
-                path_len += get_path_len(jb)
+        for next_jb in jb.attachments:
+            path_len += get_path_len(next_jb)
         return path_len
 
     path_lengths = []
     while jbs:
         jb = jbs.pop()
+        jbs.add(jb)
         path_lengths.append(get_path_len(jb))
     return math.prod(sorted(path_lengths, reverse=True)[0:3])
+
+
+def get_path_len(jb: JunctionBox, jbs: set) -> int:
+    if jb not in jbs:
+        return 0
+    jbs.discard(jb)
+    path_len = 1
+    for next_jb in jb.attachments:
+        path_len += get_path_len(next_jb, jbs)
+    return path_len
 
 
 def part2(data: list[JunctionBox], data_set: str):
@@ -68,26 +80,12 @@ def part2(data: list[JunctionBox], data_set: str):
 
     jb_pairs = sorted(list(combinations(data, 2)), key=lambda x: x[0] - x[1])
     jbs = set()
-    tmp_jbs = set()
-
-    def get_path_len(jb: JunctionBox) -> int:
-        if jb not in tmp_jbs:
-            return 0
-        tmp_jbs.discard(jb)
-        path_len = 1
-        for next_jb in jb.attachments:
-            path_len += get_path_len(next_jb)
-
-        return path_len
-
     for first_jb, second_jb in jb_pairs:
         first_jb.attachments.append(second_jb)
         second_jb.attachments.append(first_jb)
         jbs.update((first_jb, second_jb))
-        tmp_jbs = jbs.copy()
-        if (x := get_path_len(jb_pairs[-1][0])) == len(data):
+        if get_path_len(jb_pairs[-1][0], jbs.copy()) == len(data):
             return first_jb.x * second_jb.x
-    return f"{len(data)=}   {x=}"
 
 
 def solve(puzzle_input, data_set: str):
