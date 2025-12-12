@@ -48,20 +48,11 @@ def part1(data: list[JunctionBox], data_set: str):
         second_jb.attachments.append(first_jb)
         jbs.update((first_jb, second_jb))
 
-    def get_path_len(jb: JunctionBox) -> int:
-        if jb not in jbs:
-            return 0
-        jbs.discard(jb)
-        path_len = 1
-        for next_jb in jb.attachments:
-            path_len += get_path_len(next_jb)
-        return path_len
-
     path_lengths = []
     while jbs:
         jb = jbs.pop()
         jbs.add(jb)
-        path_lengths.append(get_path_len(jb))
+        path_lengths.append(get_path_len(jb, jbs))
     return math.prod(sorted(path_lengths, reverse=True)[0:3])
 
 
