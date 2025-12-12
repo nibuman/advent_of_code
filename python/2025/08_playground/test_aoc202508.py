@@ -39,7 +39,6 @@ def test_part1_real(real_data):
     assert aoc202508.part1(real_data, "input") == 123420
 
 
-@pytest.mark.skip(reason="Not implemented")
 def test_part2_real(real_data):
     """Test part 2 on real input."""
-    assert aoc202508.part2(real_data, "input") == ...
+    assert aoc202508.part2(real_data, "input") == 673096646
