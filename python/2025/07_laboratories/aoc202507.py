@@ -12,7 +12,6 @@ position = tuple[int, int]
 SPLITTERS: Final[frozenset[position]]
 R_MAX: Final[int]
 C_MAX: Final[int]
-seen_splitters = set()
 
 
 def parse(puzzle_input: str) -> position:
@@ -27,12 +26,12 @@ def parse(puzzle_input: str) -> position:
     return start
 
 
-def part1(data):
+def part1(start_pos: position):
     """Solve part 1."""
-    return count_splits(pos=data)
+    return count_splits(pos=start_pos, seen_splitters=set())
 
 
-def count_splits(pos: position) -> int:
+def count_splits(pos: position, seen_splitters: set) -> int:
     """Given a beam position, works out what the next positions and returns the number
     of splits
     """
@@ -47,10 +46,10 @@ def count_splits(pos: position) -> int:
     if (r, c) in SPLITTERS:
         seen_splitters.add((r, c))
         splits = 1
-        splits += count_splits(pos=(r + 1, c + 1))
-        splits += count_splits(pos=(r + 1, c - 1))
+        splits += count_splits(pos=(r + 1, c + 1), seen_splitters=seen_splitters)
+        splits += count_splits(pos=(r + 1, c - 1), seen_splitters=seen_splitters)
     else:
-        splits += count_splits(pos=(r + 1, c))
+        splits += count_splits(pos=(r + 1, c), seen_splitters=seen_splitters)
     return splits
 
 
