@@ -1,7 +1,6 @@
 """AoC 8, 2025: Playground."""
 
 # Standard library imports
-import collections
 from dataclasses import dataclass, field
 import pathlib
 import sys
