@@ -1,8 +1,7 @@
 """AoC 9, 2025: Movie Theatre."""
 
 # Standard library imports
-from dataclasses import dataclass, field
-import functools
+from dataclasses import dataclass
 import pathlib
 import sys
 from datetime import datetime
@@ -13,8 +12,8 @@ import itertools
 
 @dataclass(unsafe_hash=True)
 class V:
-    x: int = field(compare=True, hash=True)
-    y: int = field(compare=True, hash=True)
+    x: int
+    y: int
 
     @property
     def dist(self):
@@ -58,15 +57,14 @@ def convex_hull(data: set[V]) -> list[V]:
     v1 = V(x=0, y=1)
     convex_hull = [first_point]
     p1 = first_point
-    while True:
+    p3 = V(x=0, y=0)
+    while p3 != first_point:
         p3 = min(data, key=lambda p2: calculate_angle(v1, p2 - p1))
-        if p3 == first_point:
-            return convex_hull
         v1 = p3 - p1
         p1 = p3
-        data.remove(p1)
+        data.discard(p1)
         convex_hull.append(p1)
-    raise ValueError()
+    return convex_hull
 
 
 def part1(data: set[V]):
