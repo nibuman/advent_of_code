@@ -10,7 +10,7 @@ import math
 import itertools
 
 
-@dataclass(unsafe_hash=True)
+@dataclass(frozen=True, eq=True)
 class V:
     x: int
     y: int
@@ -24,7 +24,7 @@ class V:
         return (abs(self.x) + 1) * (abs(self.y) + 1)
 
     @property
-    def _np(self) -> np.ndarray:
+    def _np(self) -> np.typing.NDArray[np.int64]:
         return np.array([self.x, self.y])
 
     def __add__(self, other: V) -> V:
@@ -37,14 +37,14 @@ class V:
         return self._np @ other._np
 
     @classmethod
-    def from_tuple(cls, vector: tuple[int | str, int | str]) -> V:
-        return cls(x=int(vector[0]), y=int(vector[1]))
+    def from_string(cls, x: str, y: str) -> V:
+        return cls(x=int(x), y=int(y))
 
 
 def parse(puzzle_input: str) -> set[V]:
     """Parse input."""
     data = puzzle_input.split("\n")
-    return {V.from_tuple(tuple(row.split(","))) for row in data}
+    return {V.from_string(*row.split(",")) for row in data}
 
 
 def calculate_angle(vec1: V, vec2: V) -> float:
@@ -53,13 +53,15 @@ def calculate_angle(vec1: V, vec2: V) -> float:
 
 
 def convex_hull(data: set[V]) -> list[V]:
-    first_point = min(data, key=lambda v: (v.x, v.y))
-    v1 = V(x=0, y=1)
+    first_point = min(data, key=lambda p: (p.x, p.y))
+    v1 = V(x=0, y=1)  # Unit vector pointing down. First vector used in measuring angle
     convex_hull = [first_point]
     p1 = first_point
-    p3 = V(x=0, y=0)
+    p3 = V(x=first_point.x + 1, y=0)  # Just some point that isn't equal to first_point
+    data.remove(first_point)  # first_point needs to be removed for the first iteration
     while p3 != first_point:
         p3 = min(data, key=lambda p2: calculate_angle(v1, p2 - p1))
+        data.add(first_point)  # loop will not exit if first_point isn't present
         v1 = p3 - p1
         p1 = p3
         data.discard(p1)
@@ -70,7 +72,7 @@ def convex_hull(data: set[V]) -> list[V]:
 def part1(data: set[V]):
     """Solve part 1."""
     cvh = convex_hull(data)
-    all_vecs = (v2 - v1 for v1, v2 in itertools.combinations(cvh, 2))
+    all_vecs = (p2 - p1 for p1, p2 in itertools.combinations(cvh, 2))
     return max(v.area for v in all_vecs)
 
 

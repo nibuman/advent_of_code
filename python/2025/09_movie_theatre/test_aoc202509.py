@@ -27,8 +27,8 @@ def real_data():
     ],
 )
 def test_calculate_angle(v1, v2, expected_result):
-    v1 = V.from_tuple(v1)
-    v2 = V.from_tuple(v2)
+    v1 = V(*v1)
+    v2 = V(*v2)
     result = aoc202509.calculate_angle(v1, v2)
     assert expected_result == pytest.approx(result)
 
@@ -57,10 +57,9 @@ def test_part1_example1(example1):
     assert aoc202509.part1(example1) == 50
 
 
-@pytest.mark.skip(reason="Not implemented")
 def test_part2_example1(example1):
     """Test part 2 on example input."""
-    assert aoc202509.part2(example1) == ...
+    assert aoc202509.part2(example1) == 24
 
 
 def test_part1_real(real_data):
