@@ -18,6 +18,42 @@ def real_data():
     return aoc202509.parse(puzzle_input)
 
 
+@pytest.fixture
+def example1_perimeter():
+    return {
+        V(x=11, y=1),
+        V(x=11, y=7),
+        V(x=2, y=4),
+        V(x=4, y=3),
+        V(x=7, y=3),
+        V(x=9, y=5),
+        V(x=11, y=2),
+        V(x=6, y=3),
+        V(x=11, y=5),
+        V(x=2, y=5),
+        V(x=3, y=5),
+        V(x=5, y=5),
+        V(x=7, y=1),
+        V(x=6, y=5),
+        V(x=8, y=1),
+        V(x=9, y=6),
+        V(x=11, y=3),
+        V(x=10, y=1),
+        V(x=10, y=7),
+        V(x=11, y=6),
+        V(x=2, y=3),
+        V(x=8, y=5),
+        V(x=4, y=5),
+        V(x=3, y=3),
+        V(x=7, y=2),
+        V(x=5, y=3),
+        V(x=7, y=5),
+        V(x=9, y=1),
+        V(x=9, y=7),
+        V(x=11, y=4),
+    }
+
+
 @pytest.mark.parametrize(
     ["v1", "v2", "expected_result"],
     [
@@ -31,6 +67,18 @@ def test_calculate_angle(v1, v2, expected_result):
     v2 = V(*v2)
     result = aoc202509.calculate_angle(v1, v2)
     assert expected_result == pytest.approx(result)
+
+
+def test_trace_perimeter(example1, example1_perimeter):
+    expected_result = example1_perimeter
+    result = aoc202509.trace_perimeter(example1)
+    assert result == expected_result
+
+
+def test_fill(example1_perimeter):
+    expected_result = 46
+    result = len(aoc202509.fill(perimeter=example1_perimeter))
+    assert result == expected_result
 
 
 def test_convex_hull(example1):
@@ -67,7 +115,7 @@ def test_part1_real(real_data):
     assert aoc202509.part1(real_data) == 4735268538
 
 
-@pytest.mark.skip(reason="Not implemented")
+@pytest.mark.skip()
 def test_part2_real(real_data):
     """Test part 2 on real input."""
     assert aoc202509.part2(real_data) == ...
