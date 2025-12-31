@@ -8,7 +8,7 @@ from datetime import datetime
 import numpy as np
 import math
 import itertools
-from collections import deque
+from typing import Literal
 
 
 @dataclass(frozen=True, eq=True)  # With frozen and eq, __hash__ will be implemented
@@ -67,38 +67,28 @@ def convex_hull(data: set[V]) -> list[V]:
     return convex_hull
 
 
-def trace_perimeter(data: list[V]) -> set[V]:
-    adjacent_points = zip(data[:], data[1:] + data[:1], strict=True)
-    perimeter = set(data)
-    for p1, p2 in adjacent_points:
-        xs = (p1.x, p2.x)
-        ys = (p1.y, p2.y)
-        vertical_points = {V(xs[0], y) for y in range(min(ys) + 1, max(ys))}
-        horizontal_points = {V(x, ys[0]) for x in range(min(xs) + 1, max(xs))}
-        perimeter = perimeter | vertical_points | horizontal_points
-    return perimeter
+def get_direction(v: V) -> Literal["D", "R", "U", "L"]:
+    """Return the direction Down, Right, Up, or Left of a vector, assuming that it only changes
+    in one dimension
+    """
+    if v.x < 0:
+        return "L"
+    elif v.x > 0:
+        return "R"
+    elif v.y < 0:
+        return "U"
+    elif v.y > 0:
+        return "D"
+    raise ValueError("Vector is null")
 
 
-def fill(perimeter: set[V]) -> set[V]:
-    left_point = min(perimeter, key=lambda p: (p.x, p.y))
-    start_point = V(x=left_point.x + 1, y=left_point.y + 1)
-
-    filled_points = perimeter.copy()
-    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-    # Iterative flood-fill using a deque (BFS). This avoids recursion and
-    # carries the visited/filled set explicitly.
-    queue = deque([start_point])
-    while queue:
-        pos = queue.popleft()
-        if pos in filled_points:
-            continue
-        filled_points.add(pos)
-        for dx, dy in directions:
-            next_pos = V(x=pos.x + dx, y=pos.y + dy)
-            if next_pos not in filled_points:
-                queue.append(next_pos)
-
-    return filled_points
+def is_inside(p1: V, p2: V, p3: V) -> bool:
+    """For a clockwise rotation, indicate whether the square where p1, p3, p3 form the first
+    3 points will lie (mainly) inside the overall shape
+    """
+    direction = "".join([get_direction(v) for v in [p2 - p1, p3 - p2]])
+    allowed_directions = {"RD", "DL", "LU", "UR"}
+    return direction in allowed_directions
 
 
 def part1(data: list[V]):
@@ -111,24 +101,12 @@ def part1(data: list[V]):
 
 def part2(data: list[V]):
     """Solve part 2."""
-    opposite_corners = zip(data[:-2], data[2:])
-    perimeter = trace_perimeter(data)
-    print("Traced perimeter", flush=True)
-    breakpoint()
-    filled_area = fill(perimeter=perimeter)
-    print("Filled area")
-    valid_rectangles: list[tuple[V, V]] = []
-    for i, (p1, p3) in enumerate(opposite_corners):
-        if not i % 100:
-            print("iteration", i)
-        p2 = V(p1.x, p3.y)
-        p4 = V(p3.x, p1.y)
-        rectangle = [p1, p2, p3, p4]
-        rectangle_perimeter = trace_perimeter(data=rectangle)
-        filled_rectangle = fill(perimeter=rectangle_perimeter)
-        if filled_rectangle.issubset(filled_area):
-            valid_rectangles.append((p1, p3))
-    return max((p1 - p3).area for p1, p3 in valid_rectangles)
+    areas = []
+    for p1, p2, p3 in zip(data, data[1:] + data[:1], data[2:] + data[:2], strict=True):
+        if is_inside(p1, p2, p3):
+            areas.append((p3 - p1).area)
+            print(areas)
+    return max(areas)
 
 
 def solve(puzzle_input):
