@@ -113,9 +113,14 @@ def part2(data: list[V]):
     """Solve part 2."""
     opposite_corners = zip(data[:-2], data[2:])
     perimeter = trace_perimeter(data)
+    print("Traced perimeter", flush=True)
+    breakpoint()
     filled_area = fill(perimeter=perimeter)
+    print("Filled area")
     valid_rectangles: list[tuple[V, V]] = []
-    for p1, p3 in opposite_corners:
+    for i, (p1, p3) in enumerate(opposite_corners):
+        if not i % 100:
+            print("iteration", i)
         p2 = V(p1.x, p3.y)
         p4 = V(p3.x, p1.y)
         rectangle = [p1, p2, p3, p4]
