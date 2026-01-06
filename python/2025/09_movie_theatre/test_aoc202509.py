@@ -117,5 +117,11 @@ def test_part1_real(real_data):
 
 @pytest.mark.skip()
 def test_part2_real(real_data):
-    """Test part 2 on real input."""
+    """Test part 2 on real input.
+    -    1737890 too low
+    -    4595056840 too high
+    -    4545260920 too high
+    -    4541130976 ??
+    -    116013455 ??
+    """
     assert aoc202509.part2(real_data) == ...

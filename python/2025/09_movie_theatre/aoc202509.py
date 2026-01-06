@@ -42,6 +42,9 @@ class V:
         return cls(x=int(x), y=int(y))
 
 
+Rectangle = tuple[V, V]
+
+
 def parse(puzzle_input: str) -> list[V]:
     """Parse input."""
     data = puzzle_input.split("\n")
@@ -82,13 +85,15 @@ def get_direction(v: V) -> Literal["D", "R", "U", "L"]:
     raise ValueError("Vector is null")
 
 
-def is_inside(p1: V, p2: V, p3: V) -> bool:
-    """For a clockwise rotation, indicate whether the square where p1, p3, p3 form the first
-    3 points will lie (mainly) inside the overall shape
-    """
-    direction = "".join([get_direction(v) for v in [p2 - p1, p3 - p2]])
-    allowed_directions = {"RD", "DL", "LU", "UR"}
-    return direction in allowed_directions
+def corner_direction(p1: V, p2: V, p3: V) -> str:
+    return "".join([get_direction(v) for v in [p2 - p1, p3 - p2]])
+
+
+def point_in_rectangle(p: V, rect: Rectangle) -> bool:
+    r1, r2 = rect
+    x_min, x_max = min([r1.x, r2.x]), max([r1.x, r2.x])
+    y_min, y_max = min([r1.y, r2.y]), max([r1.y, r2.y])
+    return (x_min <= p.x <= x_max) and (y_min <= p.y <= y_max)
 
 
 def part1(data: list[V]):
@@ -101,12 +106,31 @@ def part1(data: list[V]):
 
 def part2(data: list[V]):
     """Solve part 2."""
-    areas = []
-    for p1, p2, p3 in zip(data, data[1:] + data[:1], data[2:] + data[:2], strict=True):
-        if is_inside(p1, p2, p3):
-            areas.append((p3 - p1).area)
-            print(areas)
-    return max(areas)
+    highest_area = 0
+    outside_points: list[V] = []
+    offset: dict[str, tuple[V, ...]] = {
+        "UL": (V(-1, 1),),
+        "RU": (V(-1, -1),),
+        "DR": (V(1, -1),),
+        "LD": (V(1, 1),),
+        "RD": (V(0, -1), V(1, 0)),
+        "UR": (V(-1, 0), V(0, -1)),
+        "LU": (V(0, 1), V(-1, 0)),
+        "DL": (V(1, 0), V(0, 1)),
+    }
+    for p1, p2, p3 in zip(data, data[1:] + data[:1], data[2:] + data[:2]):
+        direction = corner_direction(p1, p2, p3)
+        outside_points.extend([p2 + dV for dV in offset[direction]])
+    for rect in itertools.combinations(data, 2):
+        area = (rect[1] - rect[0]).area
+        if area <= highest_area:
+            continue
+        if any(
+            point_in_rectangle(outside_point, rect) for outside_point in outside_points
+        ):
+            continue
+        highest_area = area
+    return highest_area
 
 
 def solve(puzzle_input):
