@@ -19,6 +19,34 @@ def real_data():
 
 
 @pytest.fixture
+def example2():
+    """See 2025-09_plans for shape"""
+    points = [
+        (2, 7),
+        (2, 1),
+        (5, 1),
+        (5, 3),
+        (7, 3),
+        (7, 1),
+        (11, 1),
+        (11, 7),
+        (26, 7),
+        (26, 10),
+        (11, 10),
+        (11, 12),
+        (9, 12),
+        (9, 5),
+        (7, 5),
+        (7, 15),
+        (2, 15),
+        (2, 9),
+        (4, 9),
+        (4, 7),
+    ]
+    return [V(*point) for point in points]
+
+
+@pytest.fixture
 def example1_perimeter():
     return {
         V(x=11, y=1),
@@ -69,18 +97,6 @@ def test_calculate_angle(v1, v2, expected_result):
     assert expected_result == pytest.approx(result)
 
 
-def test_trace_perimeter(example1, example1_perimeter):
-    expected_result = example1_perimeter
-    result = aoc202509.trace_perimeter(example1)
-    assert result == expected_result
-
-
-def test_fill(example1_perimeter):
-    expected_result = 46
-    result = len(aoc202509.fill(perimeter=example1_perimeter))
-    assert result == expected_result
-
-
 def test_convex_hull(example1):
     expected_result = [
         V(x=2, y=3),
@@ -113,6 +129,43 @@ def test_part2_example1(example1):
 def test_part1_real(real_data):
     """Test part 1 on real input."""
     assert aoc202509.part1(real_data) == 4735268538
+
+
+def test_part1_example2(example2):
+    assert aoc202509.part1(example2) == 250
+
+
+def test_part2_example2(example2):
+    assert aoc202509.part2(example2) == 64
+
+
+def test_get_lines(example2):
+    assert aoc202509.get_lines(example2) == (
+        [
+            (V(x=2, y=2), V(x=2, y=6)),
+            (V(x=5, y=2), V(x=5, y=2)),
+            (V(x=7, y=2), V(x=7, y=2)),
+            (V(x=11, y=2), V(x=11, y=6)),
+            (V(x=26, y=8), V(x=26, y=9)),
+            (V(x=11, y=11), V(x=11, y=11)),
+            (V(x=9, y=6), V(x=9, y=11)),
+            (V(x=7, y=6), V(x=7, y=14)),
+            (V(x=2, y=10), V(x=2, y=14)),
+            (V(x=4, y=8), V(x=4, y=8)),
+        ],
+        [
+            (V(x=3, y=1), V(x=4, y=1)),
+            (V(x=6, y=3), V(x=6, y=3)),
+            (V(x=8, y=1), V(x=10, y=1)),
+            (V(x=12, y=7), V(x=25, y=7)),
+            (V(x=12, y=10), V(x=25, y=10)),
+            (V(x=10, y=12), V(x=10, y=12)),
+            (V(x=8, y=5), V(x=8, y=5)),
+            (V(x=3, y=15), V(x=6, y=15)),
+            (V(x=3, y=9), V(x=3, y=9)),
+            (V(x=3, y=7), V(x=3, y=7)),
+        ],
+    )
 
 
 @pytest.mark.skip()

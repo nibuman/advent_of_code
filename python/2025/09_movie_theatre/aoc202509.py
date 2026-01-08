@@ -70,6 +70,9 @@ def convex_hull(data: set[V]) -> list[V]:
     return convex_hull
 
 
+def rectangles_intersect(rect: Rectangle, outside_rectangle: Rectangle) -> bool: ...
+
+
 def get_direction(v: V) -> Literal["D", "R", "U", "L"]:
     """Return the direction Down, Right, Up, or Left of a vector, assuming that it only changes
     in one dimension
@@ -104,9 +107,7 @@ def part1(data: list[V]):
     return max(v.area for v in all_vecs)
 
 
-def part2(data: list[V]):
-    """Solve part 2."""
-    highest_area = 0
+def get_outside_points(data: list[V]) -> list[V]:
     outside_points: list[V] = []
     offset: dict[str, tuple[V, ...]] = {
         "UL": (V(-1, 1),),
@@ -121,6 +122,32 @@ def part2(data: list[V]):
     for p1, p2, p3 in zip(data, data[1:] + data[:1], data[2:] + data[:2]):
         direction = corner_direction(p1, p2, p3)
         outside_points.extend([p2 + dV for dV in offset[direction]])
+    return outside_points
+
+
+def get_lines(data: list[V]) -> tuple[list[tuple[V, ...]], list[tuple[V, ...]]]:
+    vertical_points: list[tuple[V, ...]] = []
+    horizontal_points: list[tuple[V, ...]] = []
+    for p1, p2 in zip(data, data[1:] + data[:1]):
+        line = p2 - p1
+        direction = get_direction(line)
+        if direction in "DU":
+            y_min, y_max = min(p1.y, p2.y), max(p1.y, p2.y)
+            vertical_points.append(
+                tuple([V(x=p1.x, y=y_min + 1), V(x=p1.x, y=y_max - 1)])
+            )
+        elif direction in "LR":
+            x_min, x_max = min(p1.x, p2.x), max(p1.x, p2.x)
+            horizontal_points.append(
+                tuple([V(x=x_min + 1, y=p1.y), V(x=x_max - 1, y=p1.y)])
+            )
+    return vertical_points, horizontal_points
+
+
+def part2(data: list[V]):
+    """Solve part 2."""
+    highest_area = 0
+    outside_points = get_outside_points(data)
     for rect in itertools.combinations(data, 2):
         area = (rect[1] - rect[0]).area
         if area <= highest_area:

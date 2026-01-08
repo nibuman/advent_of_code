@@ -10,5 +10,6 @@ dependencies = []
 dev = [
     "advent-of-code-data>=2.1.0",
     "copier>=9.11.0",
+    "ipython>=9.9.0",
     "pytest>=9.0.1",
 ]
