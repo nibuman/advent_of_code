@@ -150,16 +150,6 @@ def data_points_from_rect(rect: Rectangle) -> list[V]:
     return [p1, p2, p3, p4]
 
 
-def get_outside_rectangles(data: list[V]) -> list[Rectangle]:
-    outside_directions = {"DR", "LD", "UL", "RU"}
-    outside_rectangles = []
-    for p1, p2, p3 in zip(data, data[1:] + data[:1], data[2:] + data[:2]):
-        direction = corner_direction(p1, p2, p3)
-        if direction in outside_directions:
-            outside_rectangles.append((p1, p3))
-    return outside_rectangles
-
-
 def edges_intersect(v_edge: Edge, h_edge: Edge) -> bool:
     min_v, max_v = (min(e.y for e in v_edge), max(e.y for e in v_edge))
     min_h, max_h = (min(e.x for e in h_edge), max(e.x for e in h_edge))
@@ -172,21 +162,13 @@ def part2(data: list[V]):
     """Solve part 2."""
     highest_area = 0
     outside_points = get_outside_points(data)
-    outside_rectangles = get_outside_rectangles(data)
 
-    # shape_v_edges, shape_h_edges = get_edges(data)
-    shape_v_edges = []
-    shape_h_edges = []
-    for outside_rect in outside_rectangles:
-        rect_data = data_points_from_rect(outside_rect)
-        v, h = get_edges(rect_data)
-        shape_v_edges.extend(v)
-        shape_h_edges.extend(h)
-
+    shape_v_edges, shape_h_edges = get_edges(data)
     for rect in itertools.combinations(data, 2):
         area = (rect[1] - rect[0]).area
         if area <= highest_area:
             continue
+        # Need to check for points - just checking the line intersections doesn't work
         if any(
             point_in_rectangle(outside_point, rect) for outside_point in outside_points
         ):

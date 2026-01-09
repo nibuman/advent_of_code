@@ -104,21 +104,6 @@ def test_data_points_from_rect():
     assert result == expected_result
 
 
-def test_get_outside_rectangles(example2):
-    expected_result = [
-        (V(5, 1), V(7, 3)),
-        (V(5, 3), V(7, 1)),
-        (V(11, 1), V(26, 7)),
-        (V(26, 10), V(11, 12)),
-        (V(9, 12), V(7, 5)),
-        (V(9, 5), V(7, 15)),
-        (V(2, 9), V(4, 7)),
-        (V(4, 9), V(2, 7)),
-    ]
-    result = aoc202509.get_outside_rectangles(example2)
-    assert result == expected_result
-
-
 @pytest.mark.parametrize(
     ["v_edge", "h_edge", "expected_result"],
     [
