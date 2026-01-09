@@ -172,9 +172,16 @@ def part2(data: list[V]):
     """Solve part 2."""
     highest_area = 0
     outside_points = get_outside_points(data)
-    # outside_rectangles = get_outside_rectangles(data)
+    outside_rectangles = get_outside_rectangles(data)
 
-    shape_v_edges, shape_h_edges = get_edges(data)
+    # shape_v_edges, shape_h_edges = get_edges(data)
+    shape_v_edges = []
+    shape_h_edges = []
+    for outside_rect in outside_rectangles:
+        rect_data = data_points_from_rect(outside_rect)
+        v, h = get_edges(rect_data)
+        shape_v_edges.extend(v)
+        shape_h_edges.extend(h)
 
     for rect in itertools.combinations(data, 2):
         area = (rect[1] - rect[0]).area
@@ -186,19 +193,20 @@ def part2(data: list[V]):
             continue
         full_rect = data_points_from_rect(rect)
         rect_v_edges, rect_h_edges = get_edges(full_rect)
-        for rect_v_edge in rect_v_edges:
-            if any(edges_intersect(rect_v_edge, h_edge) for h_edge in shape_h_edges):
-                break
-            else:
-                for rect_h_edge in rect_h_edges:
-                    if any(
-                        edges_intersect(v_edge, rect_h_edge) for v_edge in shape_v_edges
-                    ):
-                        break
-                    else:
-                        highest_area = area
-                    if area == 92:
-                        breakpoint()
+
+        if any(
+            edges_intersect(rect_v_edge, h_edge)
+            for h_edge in shape_h_edges
+            for rect_v_edge in rect_v_edges
+        ):
+            continue
+        elif any(
+            edges_intersect(v_edge, rect_h_edge)
+            for v_edge in shape_v_edges
+            for rect_h_edge in rect_h_edges
+        ):
+            continue
+        highest_area = area
     return highest_area
 
 
