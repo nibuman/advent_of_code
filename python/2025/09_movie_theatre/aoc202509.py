@@ -43,6 +43,7 @@ class V:
 
 
 Rectangle = tuple[V, V]
+Edge = tuple[V, V]
 
 
 def parse(puzzle_input: str) -> list[V]:
@@ -125,29 +126,56 @@ def get_outside_points(data: list[V]) -> list[V]:
     return outside_points
 
 
-def get_lines(data: list[V]) -> tuple[list[tuple[V, ...]], list[tuple[V, ...]]]:
-    vertical_points: list[tuple[V, ...]] = []
-    horizontal_points: list[tuple[V, ...]] = []
+def get_edges(data: list[V]) -> tuple[list[Edge], list[Edge]]:
+    vertical_points: list[Edge] = []
+    horizontal_points: list[Edge] = []
     for p1, p2 in zip(data, data[1:] + data[:1]):
         line = p2 - p1
+        if line == V(0, 0):
+            continue
         direction = get_direction(line)
         if direction in "DU":
             y_min, y_max = min(p1.y, p2.y), max(p1.y, p2.y)
-            vertical_points.append(
-                tuple([V(x=p1.x, y=y_min + 1), V(x=p1.x, y=y_max - 1)])
-            )
+            vertical_points.append((V(x=p1.x, y=y_min + 1), V(x=p1.x, y=y_max - 1)))
         elif direction in "LR":
             x_min, x_max = min(p1.x, p2.x), max(p1.x, p2.x)
-            horizontal_points.append(
-                tuple([V(x=x_min + 1, y=p1.y), V(x=x_max - 1, y=p1.y)])
-            )
+            horizontal_points.append((V(x=x_min + 1, y=p1.y), V(x=x_max - 1, y=p1.y)))
     return vertical_points, horizontal_points
+
+
+def data_points_from_rect(rect: Rectangle) -> list[V]:
+    p1, p3 = rect
+    p2 = V(p1.x, p3.y)
+    p4 = V(p3.x, p1.y)
+    return [p1, p2, p3, p4]
+
+
+def get_outside_rectangles(data: list[V]) -> list[Rectangle]:
+    outside_directions = {"DR", "LD", "UL", "RU"}
+    outside_rectangles = []
+    for p1, p2, p3 in zip(data, data[1:] + data[:1], data[2:] + data[:2]):
+        direction = corner_direction(p1, p2, p3)
+        if direction in outside_directions:
+            outside_rectangles.append((p1, p3))
+    return outside_rectangles
+
+
+def edges_intersect(v_edge: Edge, h_edge: Edge) -> bool:
+    min_v, max_v = (min(e.y for e in v_edge), max(e.y for e in v_edge))
+    min_h, max_h = (min(e.x for e in h_edge), max(e.x for e in h_edge))
+    v_aligned = min_v <= h_edge[0].y <= max_v
+    h_aligned = min_h <= v_edge[0].x <= max_h
+    return h_aligned and v_aligned
 
 
 def part2(data: list[V]):
     """Solve part 2."""
     highest_area = 0
     outside_points = get_outside_points(data)
+    # outside_rectangles = get_outside_rectangles(data)
+
+    shape_v_edges, shape_h_edges = get_edges(data)
+
     for rect in itertools.combinations(data, 2):
         area = (rect[1] - rect[0]).area
         if area <= highest_area:
@@ -156,7 +184,21 @@ def part2(data: list[V]):
             point_in_rectangle(outside_point, rect) for outside_point in outside_points
         ):
             continue
-        highest_area = area
+        full_rect = data_points_from_rect(rect)
+        rect_v_edges, rect_h_edges = get_edges(full_rect)
+        for rect_v_edge in rect_v_edges:
+            if any(edges_intersect(rect_v_edge, h_edge) for h_edge in shape_h_edges):
+                break
+            else:
+                for rect_h_edge in rect_h_edges:
+                    if any(
+                        edges_intersect(v_edge, rect_h_edge) for v_edge in shape_v_edges
+                    ):
+                        break
+                    else:
+                        highest_area = area
+                    if area == 92:
+                        breakpoint()
     return highest_area
 
 

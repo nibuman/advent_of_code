@@ -97,6 +97,41 @@ def test_calculate_angle(v1, v2, expected_result):
     assert expected_result == pytest.approx(result)
 
 
+def test_data_points_from_rect():
+    rect = (V(2, 7), V(26, 10))
+    expected_result = [V(2, 7), V(2, 10), V(26, 10), V(26, 7)]
+    result = aoc202509.data_points_from_rect(rect)
+    assert result == expected_result
+
+
+def test_get_outside_rectangles(example2):
+    expected_result = [
+        (V(5, 1), V(7, 3)),
+        (V(5, 3), V(7, 1)),
+        (V(11, 1), V(26, 7)),
+        (V(26, 10), V(11, 12)),
+        (V(9, 12), V(7, 5)),
+        (V(9, 5), V(7, 15)),
+        (V(2, 9), V(4, 7)),
+        (V(4, 9), V(2, 7)),
+    ]
+    result = aoc202509.get_outside_rectangles(example2)
+    assert result == expected_result
+
+
+@pytest.mark.parametrize(
+    ["v_edge", "h_edge", "expected_result"],
+    [
+        ((V(3, 1), V(3, 5)), (V(1, 3), V(6, 3)), True),
+        ((V(0, 1), V(0, 5)), (V(1, 3), V(6, 3)), False),
+        ((V(3, 1), V(3, 3)), (V(1, 3), V(6, 3)), True),
+    ],
+)
+def test_edges_intersect(v_edge, h_edge, expected_result):
+    result = aoc202509.edges_intersect(v_edge=v_edge, h_edge=h_edge)
+    assert result == expected_result
+
+
 def test_convex_hull(example1):
     expected_result = [
         V(x=2, y=3),
@@ -140,7 +175,7 @@ def test_part2_example2(example2):
 
 
 def test_get_lines(example2):
-    assert aoc202509.get_lines(example2) == (
+    assert aoc202509.get_edges(example2) == (
         [
             (V(x=2, y=2), V(x=2, y=6)),
             (V(x=5, y=2), V(x=5, y=2)),
@@ -168,7 +203,6 @@ def test_get_lines(example2):
     )
 
 
-@pytest.mark.skip()
 def test_part2_real(real_data):
     """Test part 2 on real input.
     -    1737890 too low
@@ -177,4 +211,4 @@ def test_part2_real(real_data):
     -    4541130976 ??
     -    116013455 ??
     """
-    assert aoc202509.part2(real_data) == ...
+    assert aoc202509.part2(real_data) == 1537458069
