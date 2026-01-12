@@ -1,6 +1,7 @@
 """AoC 10, 2025: Factory."""
 
 # Standard library imports
+import enum
 import pathlib
 import sys
 from datetime import datetime
@@ -32,11 +33,7 @@ class Machine:
 
     @staticmethod
     def parse_lights(lights: str) -> int:
-        light = 0
-        for i, char in enumerate(lights):
-            if char == "#":
-                light |= 1 << i
-        return light
+        return sum(1 << i for i, char in enumerate(lights) if char == "#")
 
     @staticmethod
     def parse_switches(switches: str) -> list[int]:
