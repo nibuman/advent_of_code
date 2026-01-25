@@ -1,18 +1,19 @@
 """AoC 10, 2025: Factory."""
 
 # Standard library imports
-import pathlib
-import sys
-from datetime import datetime
-from dataclasses import dataclass
-import re
+import collections
 import itertools
-from typing import Iterable
-from operator import xor
+import pathlib
+import re
+import sys
+from dataclasses import dataclass
+from datetime import datetime
 from functools import reduce
+from operator import xor
+from typing import Iterable
 
 PATTERN = re.compile(
-    pattern=r"\[(?P<lights>[\.#]+)\] (?P<switches>\([\(\) \d\,]+) {(?P<jolts>[\d\,]+)}"
+    r"\[(?P<lights>[\.#]+)\] (?P<switches>\([\(\) \d\,]+) {(?P<jolts>[\d\,]+)}"
 )
 
 
@@ -21,16 +22,22 @@ class Machine:
     light_positions: int
     switches_positions: list[int]
     jolts: list[int]
+    switches: list[tuple[int, ...]]
 
     @classmethod
     def from_row(cls, row: str) -> Machine:
         row_match = re.match(PATTERN, row)
         assert row_match
         lights = Machine.parse_lights(row_match.group("lights"))
-        switches_positions = Machine.parse_switches(row_match.group("switches"))
+        switches_positions, switches = Machine.parse_switches(
+            row_match.group("switches")
+        )
         jolts = [int(c) for c in row_match.group("jolts").split(",")]
         return Machine(
-            light_positions=lights, switches_positions=switches_positions, jolts=jolts
+            light_positions=lights,
+            switches_positions=switches_positions,
+            jolts=jolts,
+            switches=switches,
         )
 
     @staticmethod
@@ -38,16 +45,23 @@ class Machine:
         return sum(1 << i for i, char in enumerate(lights) if char == "#")
 
     @staticmethod
-    def parse_switches(switches: str) -> list[int]:
+    def parse_switches(switches: str) -> tuple[list[int], list[tuple[int, ...]]]:
         switch_positions = []
+        switches_ = []
         for switch in switches.split(" "):
             switch = switch.removeprefix("(").removesuffix(")")
+            switches_.append(tuple(int(x) for x in switch.split(",")))
             switch_positions.append(sum(1 << int(pos) for pos in switch.split(",")))
-        return switch_positions
+        return switch_positions, switches_
 
 
 def press_switches(presses: Iterable[int]) -> int:
     return reduce(xor, presses, initial=0)
+
+
+def calc_joltages(presses: Iterable[tuple[int, ...]], jolt_count: int) -> list[int]:
+    joltages = collections.Counter(itertools.chain(*presses))
+    return [joltages[i] for i in range(jolt_count)]
 
 
 def parse(puzzle_input: str) -> list[Machine]:
@@ -69,8 +83,32 @@ def part1(machines: list[Machine]):
     return sum(switch_presses)
 
 
-def part2(data):
+def presses_required(machine: Machine) -> int:
+    min_presses = max(machine.jolts)
+    press_combinations = itertools.combinations_with_replacement(
+        machine.switches, min_presses
+    )
+    while True:
+        next_combinations = []
+        for presses in press_combinations:
+            jolts_from_presses = calc_joltages(presses, len(machine.jolts))
+            if any(
+                calc_j > j
+                for calc_j, j in zip(jolts_from_presses, machine.jolts, strict=True)
+            ):
+                continue
+            if jolts_from_presses == machine.jolts:
+                return len(presses)
+            for switches in machine.switches:
+                next_presses = list(presses)
+                next_presses.append(switches)
+                next_combinations.append(tuple(next_presses))
+        press_combinations = next_combinations
+
+
+def part2(data: list[Machine]):
     """Solve part 2."""
+    return sum(presses_required(machine) for machine in data)
 
 
 def solve(puzzle_input):

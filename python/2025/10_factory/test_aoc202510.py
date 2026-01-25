@@ -32,19 +32,61 @@ def test_parse_lights(input: str, expected_result: int):
         ("(3) (1,3) (2) (2,3) (0,2) (0,1)", [8, 10, 4, 12, 5, 3]),
     ],
 )
-def test_parse_switches(input: str, expected_result: int):
-    result = aoc202510.Machine.parse_switches(input)
+def test_parse_switch_positions(input: str, expected_result: int):
+    result = aoc202510.Machine.parse_switches(input)[0]
     assert result == expected_result
 
 
 @pytest.mark.parametrize(
     ["input", "expected_result"],
     [
+        (
+            "(3) (1,3) (2) (2,3) (0,2) (0,1)",
+            [(3,), (1, 3), (2,), (2, 3), (0, 2), (0, 1)],
+        ),
+    ],
+)
+def test_parse_switches(input: str, expected_result: int):
+    result = aoc202510.Machine.parse_switches(input)[1]
+    assert result == expected_result
+
+
+@pytest.mark.parametrize(
+    ["presses", "expected_result"],
+    [
+        (
+            [
+                (3,),
+                (1, 3),
+                (1, 3),
+                (1, 3),
+                (2, 3),
+                (2, 3),
+                (2, 3),
+                (0, 2),
+                (0, 1),
+                (0, 1),
+            ],
+            [3, 5, 4, 7],
+        ),
+        ([(0, 1), (0, 1), (3,)], [2, 2, 0, 1]),
+    ],
+)
+def test_calc_joltages_example1(
+    example1, presses: list[tuple[int, ...]], expected_result: list[int]
+):
+    result = aoc202510.calc_joltages(presses, len(expected_result))
+    assert result == expected_result
+
+
+@pytest.mark.parametrize(
+    ["presses", "expected_result"],
+    [
         ([8, 10, 4], 6),
     ],
 )
-def test_press_switches(input: list[int], expected_result: int):
-    result = aoc202510.press_switches(input)
+def test_press_switches(presses: list[int], expected_result: int):
+    result = aoc202510.press_switches(presses)
     assert result == expected_result
 
 
@@ -54,15 +96,25 @@ def test_parse_example1(example1):
     assert example1 == ...
 
 
+@pytest.mark.parametrize(
+    ["machine_idx", "expected_result"], [(0, 10), (1, 12), (2, 11)]
+)
+def test_presses_required(
+    example1: list[aoc202510.Machine], machine_idx: int, expected_result: int
+):
+    machine = example1[machine_idx]
+    result = aoc202510.presses_required(machine)
+    assert result == expected_result
+
+
 def test_part1_example1(example1):
     """Test part 1 on example input."""
     assert aoc202510.part1(example1) == 7
 
 
-@pytest.mark.skip(reason="Not implemented")
 def test_part2_example1(example1):
     """Test part 2 on example input."""
-    assert aoc202510.part2(example1) == ...
+    assert aoc202510.part2(example1) == 33
 
 
 def test_part1_real(real_data):
