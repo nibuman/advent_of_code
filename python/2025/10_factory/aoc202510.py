@@ -16,13 +16,15 @@ PATTERN = re.compile(
     r"\[(?P<lights>[\.#]+)\] (?P<switches>\([\(\) \d\,]+) {(?P<jolts>[\d\,]+)}"
 )
 
+type Switch = tuple[int, ...]
+
 
 @dataclass
 class Machine:
     light_positions: int
     switches_positions: list[int]
     jolts: list[int]
-    switches: list[tuple[int, ...]]
+    switches: list[Switch]
 
     @classmethod
     def from_row(cls, row: str) -> Machine:
@@ -84,26 +86,30 @@ def part1(machines: list[Machine]):
 
 
 def presses_required(machine: Machine) -> int:
-    min_presses = max(machine.jolts)
-    press_combinations = itertools.combinations_with_replacement(
-        machine.switches, min_presses
+    available_switches = [s for s in machine.switches if s[0] == 0]
+    current_sequences = list(
+        itertools.combinations_with_replacement(available_switches, machine.jolts[0])
     )
-    while True:
-        next_combinations = []
-        for presses in press_combinations:
-            jolts_from_presses = calc_joltages(presses, len(machine.jolts))
-            if any(
-                calc_j > j
-                for calc_j, j in zip(jolts_from_presses, machine.jolts, strict=True)
-            ):
+    for num, jolts in enumerate(machine.jolts[1:], start=1):
+        new_sequences = []
+        available_switches = [s for s in machine.switches if s[0] == num]
+        for sequence in current_sequences:
+            existing_jolts = calc_joltages(sequence, len(machine.jolts))[num]
+            if existing_jolts > jolts:
                 continue
-            if jolts_from_presses == machine.jolts:
-                return len(presses)
-            for switches in machine.switches:
-                next_presses = list(presses)
-                next_presses.append(switches)
-                next_combinations.append(tuple(next_presses))
-        press_combinations = next_combinations
+
+            switch_combinations = list(
+                itertools.combinations_with_replacement(
+                    available_switches, jolts - existing_jolts
+                )
+            )
+            for comb in switch_combinations:
+                new_sequences.append([*itertools.chain(sequence, comb)])
+        breakpoint()
+        current_sequences = new_sequences
+        print(f"{len(current_sequences)=}")
+        new_sequences = []
+    return min(len(s) for s in current_sequences)
 
 
 def part2(data: list[Machine]):
@@ -116,7 +122,7 @@ def solve(puzzle_input):
     data = parse(puzzle_input)
     for name, func in (("Part1", part1), ("Part2", part2)):
         t1 = datetime.now()
-        result = func(data)
+        result = func(data[:2])
         t2 = datetime.now()
         yield name, result, (t2 - t1).microseconds
 
@@ -136,5 +142,6 @@ if __name__ == "__main__":
             "\n".join(
                 f"{puzzle}: {solution} (in {time / 1000} ms)"
                 for puzzle, solution, time in solutions
-            )
+            ),
+            flush=True,
         )
