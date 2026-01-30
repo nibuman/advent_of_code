@@ -12,6 +12,9 @@ from functools import reduce
 from operator import xor
 from typing import Iterable
 
+import numpy as np
+from scipy.optimize import LinearConstraint, milp
+
 PATTERN = re.compile(
     r"\[(?P<lights>[\.#]+)\] (?P<switches>\([\(\) \d\,]+) {(?P<jolts>[\d\,]+)}"
 )
@@ -61,6 +64,27 @@ def press_switches(presses: Iterable[int]) -> int:
     return reduce(xor, presses, initial=0)
 
 
+def get_linear_equations(machine: Machine) -> np.typing.ArrayLike:
+    """Represent each linear equation as shown:
+    s4 + s5 = 3 =>      [0, 0, 0, 0, 1, 1]
+    s1 + s5 = 5 =>      [0, 1, 0, 0, 0, 1]
+    s2 + s3 + s4 = 4 => [0, 0, 1, 1, 1, 0]
+    s0 + s1 + s3 = 7 => [1, 1, 0, 1, 0, 0]
+    Return as a matrix
+    The results of the equation (3, 4, 5, and 7) will be supplied separately to the solver as upper/lower bounds for the equations
+    """
+    equation_count = len(machine.jolts)
+    switch_count = len(machine.switches)
+    equations = []
+    for eq_id in range(equation_count):
+        this_equation = [0] * switch_count
+        for s_id, switch in enumerate(machine.switches):
+            if eq_id in switch:
+                this_equation[s_id] = 1
+        equations.append(this_equation)
+    return np.array(equations)
+
+
 def calc_joltages(presses: Iterable[tuple[int, ...]], jolt_count: int) -> list[int]:
     joltages = collections.Counter(itertools.chain(*presses))
     return [joltages[i] for i in range(jolt_count)]
@@ -86,30 +110,29 @@ def part1(machines: list[Machine]):
 
 
 def presses_required(machine: Machine) -> int:
-    available_switches = [s for s in machine.switches if s[0] == 0]
-    current_sequences = list(
-        itertools.combinations_with_replacement(available_switches, machine.jolts[0])
-    )
-    for num, jolts in enumerate(machine.jolts[1:], start=1):
-        new_sequences = []
-        available_switches = [s for s in machine.switches if s[0] == num]
-        for sequence in current_sequences:
-            existing_jolts = calc_joltages(sequence, len(machine.jolts))[num]
-            if existing_jolts > jolts:
-                continue
+    """For example1 row1: (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}
+    Adding the number of presses for each switch s:
+    s4 + s5 = 3
+    s1 + s5 = 5
+    s2 + s3 + s4 = 4
+    s0 + s1 + s3 = 7
+    while trying to minimise s0 + s1 + s2 + s3 + s4 + s5 ([1, 1, 1, 1, 1])
+    """
+    # Trying to minimise this, the coeffs for each switch
+    c = np.array([1] * len(machine.switches))
 
-            switch_combinations = list(
-                itertools.combinations_with_replacement(
-                    available_switches, jolts - existing_jolts
-                )
-            )
-            for comb in switch_combinations:
-                new_sequences.append([*itertools.chain(sequence, comb)])
-        breakpoint()
-        current_sequences = new_sequences
-        print(f"{len(current_sequences)=}")
-        new_sequences = []
-    return min(len(s) for s in current_sequences)
+    # Matrix, each row is an equation, each col a switch
+    A = get_linear_equations(machine=machine)
+
+    # The upper and lower bounds. Want an exact answer so they're the same
+    b_l = b_u = np.array(machine.jolts)
+    constraints = LinearConstraint(A, b_l, b_u)
+
+    # Indicates (with a '1') which coefficients should be integral (all of them!)
+    integrality = np.ones_like(c)
+
+    res = milp(c=c, constraints=constraints, integrality=integrality)
+    return int(sum(res.x))
 
 
 def part2(data: list[Machine]):
@@ -122,7 +145,7 @@ def solve(puzzle_input):
     data = parse(puzzle_input)
     for name, func in (("Part1", part1), ("Part2", part2)):
         t1 = datetime.now()
-        result = func(data[:2])
+        result = func(data)
         t2 = datetime.now()
         yield name, result, (t2 - t1).microseconds
 

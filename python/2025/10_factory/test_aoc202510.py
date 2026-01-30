@@ -2,6 +2,7 @@
 
 # Third party imports
 import aoc202510
+import numpy as np
 import pytest
 
 
@@ -107,6 +108,18 @@ def test_presses_required(
     assert result == expected_result
 
 
+def test_get_linear_equations(example1: list[aoc202510.Machine]):
+    machine = example1[0]
+    expected_result = [
+        [0, 0, 0, 0, 1, 1],
+        [0, 1, 0, 0, 0, 1],
+        [0, 0, 1, 1, 1, 0],
+        [1, 1, 0, 1, 0, 0],
+    ]
+    result = aoc202510.get_linear_equations(machine=machine)
+    assert np.array_equal(result, expected_result)
+
+
 def test_part1_example1(example1):
     """Test part 1 on example input."""
     assert aoc202510.part1(example1) == 7
@@ -122,7 +135,6 @@ def test_part1_real(real_data):
     assert aoc202510.part1(real_data) == 530
 
 
-@pytest.mark.skip(reason="Not implemented")
 def test_part2_real(real_data):
     """Test part 2 on real input."""
-    assert aoc202510.part2(real_data) == ...
+    assert aoc202510.part2(real_data) == 20172
