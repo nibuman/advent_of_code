@@ -18,8 +18,24 @@ def parse(puzzle_input: str) -> NetworkMap:
     return data_map
 
 
+def count_route(
+    device: str, input_data: NetworkMap, completed_paths: dict[str, int] = {}
+) -> int:
+    if device in completed_paths:
+        return completed_paths[device]
+    route_count = 0
+    for output in input_data[device]:
+        if output == "out":
+            completed_paths[device] = 1
+            return 1
+        route_count += count_route(device=output, input_data=input_data)
+    completed_paths[device] = route_count
+    return route_count
+
+
 def part1(data):
     """Solve part 1."""
+    return count_route(device="you", input_data=data, completed_paths={})
 
 
 def part2(data):
