@@ -124,7 +124,7 @@ def presses_required(machine: Machine) -> int:
     # Matrix, each row is an equation, each col a switch
     A = get_linear_equations(machine=machine)
 
-    # The upper and lower bounds. Want an exact answer so they're the same
+    # The upper and lower bounds. Using equality (rather than >, < inequalities) so they're the same
     b_l = b_u = np.array(machine.jolts)
     constraints = LinearConstraint(A, b_l, b_u)
 
