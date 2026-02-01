@@ -12,6 +12,12 @@ def example1():
 
 
 @pytest.fixture
+def example2():
+    puzzle_input = aoc202511.read_file("example2.txt")
+    return aoc202511.parse(puzzle_input)
+
+
+@pytest.fixture
 def real_data():
     puzzle_input = aoc202511.read_file("input.txt")
     return aoc202511.parse(puzzle_input)
@@ -54,7 +60,9 @@ iii: out"""
     ["device", "expected_result"], [("ggg", 1), ("ddd", 1), ("bbb", 2), ("you", 5)]
 )
 def test_count_route(example1_parsed, device, expected_result):
-    result = aoc202511.count_route(device=device, input_data=example1_parsed)
+    result = aoc202511.count_route(
+        device=device, input_data=example1_parsed, completed_paths={}
+    )
     assert result == expected_result
 
 
@@ -63,10 +71,9 @@ def test_part1_example1(example1):
     assert aoc202511.part1(example1) == 5
 
 
-@pytest.mark.skip(reason="Not implemented")
-def test_part2_example1(example1):
+def test_part2_example2(example2):
     """Test part 2 on example input."""
-    assert aoc202511.part2(example1) == ...
+    assert aoc202511.part2(example2) == 2
 
 
 def test_part1_real(real_data):
@@ -74,7 +81,6 @@ def test_part1_real(real_data):
     assert aoc202511.part1(real_data) == 508
 
 
-@pytest.mark.skip(reason="Not implemented")
 def test_part2_real(real_data):
     """Test part 2 on real input."""
-    assert aoc202511.part2(real_data) == ...
+    assert aoc202511.part2(real_data) == 315116216513280
