@@ -22,6 +22,8 @@ def parse(puzzle_input: str) -> NetworkMap:
 def count_route(
     device: str, input_data: NetworkMap, completed_paths: dict[str, int]
 ) -> int:
+    """completed_paths is a cache of already visited devices and the number of
+    routes from there to 'out'"""
     if device in completed_paths:
         return completed_paths[device]
     route_count = 0
@@ -41,7 +43,7 @@ def part1(data):
     return count_route(device="you", input_data=data, completed_paths={})
 
 
-@dataclass(frozen=True, eq=True)
+@dataclass(frozen=True, eq=True, kw_only=True)
 class Route:
     device: str
     fft: bool
@@ -55,14 +57,18 @@ def count_route2(
     dac: bool = False,
     fft: bool = False,
 ) -> int:
-    if Route(device, fft, dac) in completed_paths:
-        return completed_paths[Route(device, fft, dac)]
+    """Need to keep track of whether devices 'dac' and 'fft' have been passed. Devices already
+    visited are cached in completed_paths, which now also needs to know whether 'dac' and  'fft'
+    were visited. When 'out' is reached, it will only count if both 'dac' and 'fft' have been
+    visited"""
+    if Route(device=device, fft=fft, dac=dac) in completed_paths:
+        return completed_paths[Route(device=device, fft=fft, dac=dac)]
     route_count = 0
     dac = dac or (device == "dac")
     fft = fft or (device == "fft")
     for output in input_data[device]:
         if output == "out":
-            completed_paths[Route(device, fft, dac)] = dac and fft
+            completed_paths[Route(device=device, fft=fft, dac=dac)] = dac and fft
             return dac and fft
         route_count += count_route2(
             device=output,
@@ -71,7 +77,7 @@ def count_route2(
             dac=dac,
             fft=fft,
         )
-    completed_paths[Route(device, fft, dac)] = route_count
+    completed_paths[Route(device=device, fft=fft, dac=dac)] = route_count
     return route_count
 
 
