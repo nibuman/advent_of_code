@@ -41,14 +41,11 @@ def part1(data):
     return count_route(device="you", input_data=data, completed_paths={})
 
 
-@dataclass
+@dataclass(frozen=True, eq=True)
 class Route:
     device: str
     fft: bool
     dac: bool
-
-    def __hash__(self):
-        return hash((self.device, self.fft, self.dac))
 
 
 def count_route2(
